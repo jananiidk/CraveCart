@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crave Cart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cream:#fdf6ee;--salmon:#f87c6b;--salmon-light:#fde8e4;
+      --green-light:#e8f5e9;--gold:#e8a020;--dark:#2b1b0e;
+      --gray:#888;--sidebar-w:195px
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);display:flex;min-height:100vh}
+
+    /* ── SIDEBAR ── */
+    .sidebar{width:var(--sidebar-w);min-height:100vh;background:#fff;display:flex;flex-direction:column;padding:24px 18px;gap:5px;position:fixed;top:0;left:0;bottom:0;box-shadow:2px 0 16px rgba(0,0,0,.06);z-index:100}
+    .logo{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .logo-icon{width:40px;height:40px;background:var(--salmon);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .logo-text{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;line-height:1.3}
+    .nav-link{display:block;padding:9px 13px;border-radius:10px;color:var(--gray);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left}
+    .nav-link:hover,.nav-link.active{background:var(--salmon-light);color:var(--salmon)}
+    .nav-sep{height:1px;background:#f0e8d8;margin:8px 4px}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .topbar{background:#fff;display:flex;align-items:center;gap:10px;padding:13px 24px;position:sticky;top:0;z-index:90;box-shadow:0 2px 12px rgba(0,0,0,.06);flex-wrap:wrap}
+    .address-pill{display:flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid #e8d8c8;border-radius:20px;padding:7px 15px;font-size:13px;font-weight:500;cursor:pointer;color:var(--dark);max-width:250px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:border-color .2s}
+    .address-pill:hover{border-color:var(--salmon)}
+    .topbar-spacer{flex:1}
+    .topbar-btn{display:flex;align-items:center;gap:5px;padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+    .btn-search{background:var(--cream);color:var(--dark);border:1.5px solid #e0d0c0}
+    .btn-cart{background:var(--salmon-light);color:var(--salmon)}
+    .btn-cart:hover{background:var(--salmon);color:#fff}
+    .btn-account{background:var(--cream);color:var(--dark);border:1.5px solid #e0d0c0}
+
+    /* ── CONTENT ── */
+    .content-area{display:flex;padding:24px;gap:20px;flex:1}
+    .feed{flex:1;min-width:0;display:flex;flex-direction:column;gap:34px}
+
+    /* ── RESTO CHIPS ── */
+    .resto-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+    .resto-chip{padding:7px 16px;border-radius:20px;border:1.5px solid #e0d0c0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+    .resto-chip:hover,.resto-chip.active{background:var(--salmon);color:#fff;border-color:var(--salmon)}
+
+    /* ── SECTIONS ── */
+    .section-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--salmon);margin-bottom:6px}
+    .section-meta{font-size:12px;color:var(--gray);margin-bottom:14px}
+    .section-sep{height:2px;background:linear-gradient(90deg,var(--salmon-light),transparent);border-radius:2px;margin-bottom:16px}
+
+    /* ── FOOD CARDS ── */
+    .items-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+    .food-card{border-radius:16px;padding:11px;position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s;overflow:hidden}
+    .food-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
+    .card-bg-0{background:var(--salmon-light)}
+    .card-bg-1{background:var(--green-light)}
+    .card-bg-2{background:#fff3e0}
+    .card-bg-3{background:#f3e5f5}
+    .card-bg-4{background:#e3f2fd}
+    .card-img-wrap{width:100%;aspect-ratio:1;border-radius:12px;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;margin-bottom:9px;position:relative}
+    .card-emoji{font-size:50px;line-height:1}
+    .wish-btn{position:absolute;top:7px;right:7px;width:26px;height:26px;background:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:2}
+    .wish-btn.liked{color:var(--salmon)}
+    .rating-badge{position:absolute;top:7px;left:7px;background:rgba(255,255,255,.92);border-radius:9px;padding:2px 7px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;z-index:2}
+    .rating-badge::before{content:'★';color:var(--gold)}
+    .card-name{font-size:13px;font-weight:600;margin-bottom:2px}
+    .card-price{font-size:12px;color:var(--gray);font-weight:500}
+    .card-price strong{color:var(--salmon);font-weight:700}
+    .card-sub{font-size:10px;color:var(--gray);margin-top:2px}
+    .add-btn{margin-top:8px;width:100%;padding:7px 0;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--salmon);color:#fff;opacity:0;transform:translateY(4px);transition:all .2s}
+    .food-card:hover .add-btn{opacity:1;transform:translateY(0)}
+    .add-btn:hover{background:#e5604f}
+    .del-btn{position:absolute;bottom:44px;right:9px;background:rgba(255,255,255,.92);border:none;border-radius:7px;font-size:11px;padding:3px 8px;cursor:pointer;color:#e53935;display:none;z-index:3;font-weight:600}
+    .food-card:hover .del-btn{display:block}
+
+    /* ── HUNT SIDEBAR ── */
+    .hunt-sidebar{width:175px;flex-shrink:0}
+    .hunt-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--gold);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #f0e0c0}
+    .hunt-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:11px;cursor:pointer;margin-bottom:5px;transition:all .2s;font-size:13px;font-weight:500}
+    .hunt-item:hover,.hunt-item.active{background:var(--salmon-light);color:var(--salmon);font-weight:700}
+    .hunt-emoji{width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+    /* ── ORDER / STAT ── */
+    .order-card{border:1.5px solid #f0e8d8;border-radius:14px;padding:14px 16px;margin-bottom:12px;background:#fff}
+    .order-card-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;align-items:flex-start;gap:8px}
+    .order-status{padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap}
+    .status-Delivered{background:#e8f5e9;color:#388e3c}
+    .status-Preparing{background:#fff3e0;color:#e65100}
+    .status-OutforDelivery{background:#e3f2fd;color:#1565c0}
+    .item-tag{background:var(--salmon-light);border-radius:7px;padding:2px 9px;font-size:12px;margin-right:5px;display:inline-block;margin-bottom:4px}
+    .stat-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+    .stat-box{background:#fff;border-radius:14px;padding:16px 22px;flex:1;min-width:100px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .stat-num{font-size:24px;font-weight:900;color:var(--salmon)}
+    .stat-label{font-size:12px;color:var(--gray)}
+
+    /* ── CART ── */
+    .cart-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0e8d8;font-size:13px;gap:8px}
+    .cart-row-name{flex:1}
+    .cart-row-qty{display:flex;align-items:center;gap:6px}
+    .qty-btn{width:24px;height:24px;border-radius:6px;border:1.5px solid #e0d0c0;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .qty-btn:hover{border-color:var(--salmon);color:var(--salmon)}
+    .cart-row-price{font-weight:700;color:var(--salmon);min-width:54px;text-align:right}
+    .cart-total-row{font-weight:700;font-size:15px;margin-top:12px;display:flex;justify-content:space-between}
+
+    /* ── MODALS ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:20px;padding:28px 26px;width:400px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:popIn .22s ease}
+    @keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal h3{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:16px}
+    .modal input,.modal select{width:100%;padding:11px 14px;border:1.5px solid #e0d0c0;border-radius:11px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;margin-bottom:12px}
+    .modal input:focus,.modal select:focus{border-color:var(--salmon)}
+    .modal label{font-size:12px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+    .modal-btn{padding:9px 22px;border-radius:11px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+    .modal-btn.confirm{background:var(--salmon);color:#fff}
+    .modal-btn.confirm:hover{background:#e5604f}
+    .modal-btn.cancel{background:var(--cream);color:var(--gray);border:1.5px solid #e0d0c0}
+    .modal-btn.cancel:hover{border-color:var(--salmon);color:var(--salmon)}
+    .modal-btn.danger{background:#fff0ee;color:var(--salmon);border:1.5px solid var(--salmon)}
+
+    /* ── LOGIN SCREEN ── */
+    .login-screen{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:5000;overflow-y:auto;padding:20px 0}
+    .lbox{background:#fff;border-radius:24px;padding:36px 32px;width:460px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.12);margin:auto}
+    .lbox h2{font-family:'Playfair Display',serif;font-size:26px;color:var(--salmon);margin-bottom:5px}
+    .lbox-sub{font-size:13px;color:var(--gray);margin-bottom:22px}
+    .ltabs{display:flex;gap:8px;margin-bottom:20px}
+    .ltab{flex:1;padding:10px;border-radius:11px;border:1.5px solid #e0d0c0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+    .ltab.on{background:var(--salmon);color:#fff;border-color:var(--salmon)}
+    .stabs{display:flex;gap:6px;margin-bottom:18px}
+    .stab{flex:1;padding:8px;border-radius:9px;border:1.5px solid #e0d0c0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+    .stab.on{background:var(--salmon-light);color:var(--salmon);border-color:var(--salmon)}
+    .lbox input,.lbox select{width:100%;padding:11px 14px;border:1.5px solid #e0d0c0;border-radius:11px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:11px;transition:border-color .2s}
+    .lbox input:focus,.lbox select:focus{border-color:var(--salmon)}
+    .lbox label{font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+    .lbtn{width:100%;padding:13px;border:none;border-radius:12px;background:var(--salmon);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s;margin-top:4px}
+    .lbtn:hover{background:#e5604f}
+    .lbtn:disabled{opacity:.6;cursor:not-allowed}
+    .errmsg{color:#e53935;font-size:13px;text-align:center;min-height:16px;margin-bottom:6px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    /* ── SWITCH RESTAURANT MODAL ── */
+    .switch-modal{text-align:center}
+    .switch-modal .resto-names{display:flex;justify-content:center;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap}
+    .switch-modal .rname{background:var(--salmon-light);color:var(--salmon);font-weight:700;padding:6px 14px;border-radius:10px;font-size:13px}
+    .switch-modal .arrow{color:var(--gray);font-size:18px}
+    .switch-modal p{font-size:13px;color:var(--gray);margin-bottom:4px}
+
+    /* ── SPINNER / TOAST ── */
+    .spin{display:inline-block;width:15px;height:15px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes rot{to{transform:rotate(360deg)}}
+    .toast{position:fixed;bottom:28px;right:28px;background:var(--dark);color:#fff;padding:12px 22px;border-radius:13px;font-size:14px;font-weight:500;box-shadow:0 8px 28px rgba(0,0,0,.2);transform:translateY(20px);opacity:0;pointer-events:none;transition:all .3s;z-index:7000}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    @media(max-width:1100px){.items-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:800px){.items-grid{grid-template-columns:repeat(2,1fr)}.hunt-sidebar{display:none}}
+    @media(max-width:560px){.sidebar{display:none}.main{margin-left:0}.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     LOGIN / REGISTER SCREEN
+════════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="lbox">
+    <h2>🍔 Crave Cart</h2>
+    <p class="lbox-sub">Order food or manage your restaurant</p>
+
+    <div class="ltabs">
+      <button class="ltab on" id="roleTabCust" onclick="setRole('customer')">👤 Customer</button>
+      <button class="ltab"    id="roleTabRest" onclick="setRole('restaurant')">🏪 Restaurant</button>
+    </div>
+
+    <!-- ── CUSTOMER ── -->
+    <div id="custPanel">
+      <div class="stabs">
+        <button class="stab on" id="cSubLogin" onclick="setCustSub('login')">Login</button>
+        <button class="stab"    id="cSubReg"   onclick="setCustSub('register')">Register New</button>
+      </div>
+
+      <div id="cLoginForm">
+        <label>Select Account</label>
+        <select id="custSel"><option value="">Loading…</option></select>
+        <label>Password</label>
+        <input type="password" id="custPass" placeholder="Enter password"/>
+        <div class="errmsg" id="cLoginErr"></div>
+        <button class="lbtn" id="cLoginBtn" onclick="doCustomerLogin()">Login</button>
+      </div>
+
+      <div id="cRegForm" style="display:none">
+        <div class="form-row">
+          <div><label>First Name</label><input id="cRFirst" placeholder="Rohan"/></div>
+          <div><label>Last Name</label><input id="cRLast"  placeholder="Desai"/></div>
+        </div>
+        <label>Email</label>
+        <input id="cREmail" type="email" placeholder="you@example.com"/>
+        <label>Phone</label>
+        <input id="cRPhone" placeholder="9xxxxxxxxx" maxlength="12"/>
+        <label>Delivery Address</label>
+        <input id="cRAddr" placeholder="e.g. 12 MG Road, Bangalore" maxlength="60"/>
+        <label>Password</label>
+        <input id="cRPass" type="password" placeholder="Create a password" maxlength="20"/>
+        <div class="errmsg" id="cRegErr"></div>
+        <button class="lbtn" id="cRegBtn" onclick="doCustomerRegister()">Create Account</button>
+      </div>
+    </div>
+
+    <!-- ── RESTAURANT ── -->
+    <div id="restPanel" style="display:none">
+      <div class="stabs">
+        <button class="stab on" id="rSubLogin" onclick="setRestSub('login')">Login</button>
+        <button class="stab"    id="rSubReg"   onclick="setRestSub('register')">Register New</button>
+      </div>
+
+      <div id="rLoginForm">
+        <label>Select Restaurant</label>
+        <select id="restSel"><option value="">Loading…</option></select>
+        <label>Password</label>
+        <input type="password" id="restPass" placeholder="Enter password"/>
+        <div class="errmsg" id="rLoginErr"></div>
+        <button class="lbtn" id="rLoginBtn" onclick="doRestaurantLogin()">Login</button>
+      </div>
+
+      <div id="rRegForm" style="display:none">
+        <label>Restaurant Name</label>
+        <input id="rRName" placeholder="e.g. Urban Spice"/>
+        <label>Address</label>
+        <input id="rRAddr" placeholder="e.g. 12 Residency Road, Bangalore" maxlength="60"/>
+        <label>Phone</label>
+        <input id="rRPhone" placeholder="9xxxxxxxxx" maxlength="12"/>
+        <label>Password</label>
+        <input id="rRPass" type="password" placeholder="Create a password" maxlength="20"/>
+        <div class="errmsg" id="rRegErr"></div>
+        <button class="lbtn" id="rRegBtn" onclick="doRestaurantRegister()">Register Restaurant</button>
+        <p style="font-size:11px;color:var(--gray);margin-top:10px;text-align:center">After registering, switch to the Login tab to sign in.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADD ITEM MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="addItemModal">
+  <div class="modal">
+    <h3>➕ Add Menu Item</h3>
+    <label>Item Name</label>
+    <input id="aiName" placeholder="e.g. Paneer Tikka"/>
+    <label>Price (₹)</label>
+    <input id="aiPrice" type="number" placeholder="220"/>
+    <label>Category</label>
+    <select id="aiCat"><option value="">Select category…</option></select>
+    <div class="errmsg" id="aiErr"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeM('addItemModal')">Cancel</button>
+      <button class="modal-btn confirm" id="aiBtn" onclick="submitItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADD CATEGORY MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="addCatModal">
+  <div class="modal">
+    <h3>📂 Add New Category</h3>
+    <label>Category Name (e.g. Biryani, Chinese, Desserts)</label>
+    <input id="acName" placeholder="e.g. Biryani"/>
+    <div class="errmsg" id="acErr"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeM('addCatModal')">Cancel</button>
+      <button class="modal-btn confirm" id="acBtn" onclick="submitCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADDRESS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="addrModal">
+  <div class="modal">
+    <h3>📍 Delivery Address</h3>
+    <label>Your delivery address</label>
+    <input id="addrInp" placeholder="e.g. 12 MG Road, Bangalore" maxlength="60"/>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeM('addrModal')">Cancel</button>
+      <button class="modal-btn confirm" onclick="confirmAddr()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     CART MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <h3>🛒 Cart</h3>
+    <div id="cartBody" style="min-height:40px"></div>
+    <div class="cart-total-row" id="cartTotalRow" style="display:none"></div>
+    <div style="margin-top:14px">
+      <label>Payment Mode</label>
+      <select id="payMode">
+        <option value="UPI">UPI</option>
+        <option value="CARD">Card</option>
+        <option value="COD">Cash on Delivery</option>
+        <option value="NetBanking">Net Banking</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn danger"  onclick="clearCart()">Clear</button>
+      <button class="modal-btn cancel"  onclick="closeM('cartModal')">Close</button>
+      <button class="modal-btn confirm" id="placeBtn" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SEARCH MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal">
+    <h3>🔍 Search Items</h3>
+    <input id="searchInp" placeholder="Type item name…"/>
+    <div id="searchRes" style="max-height:300px;overflow-y:auto;font-size:13px"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeM('searchModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     RATING MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="rateModal">
+  <div class="modal">
+    <h3>⭐ Rate Restaurant</h3>
+    <p id="rateRestoName" style="font-weight:600;margin-bottom:14px;color:var(--gray)"></p>
+    <div id="starPicker" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel"  onclick="closeM('rateModal')">Skip</button>
+      <button class="modal-btn confirm" onclick="submitRating()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🍔</div>
+    <div class="logo-text">Foodie<br>Hunter</div>
+  </div>
+  <button class="nav-link active" onclick="showPage('home')">🏠 Home</button>
+  <button class="nav-link" id="navOrders"   onclick="showPage('orders')">📦 Orders</button>
+  <button class="nav-link" id="navWishlist" onclick="showPage('wishlist')">❤️ Wishlist</button>
+  <button class="nav-link" id="navCart"     onclick="openCartModal()">🛒 Cart</button>
+  <div class="nav-sep"></div>
+  <button class="nav-link" onclick="doLogout()" style="color:#e53935">🚪 Logout</button>
+</aside>
+
+<!-- ════════════════════════════════════════
+     MAIN AREA
+════════════════════════════════════════ -->
+<div class="main">
+  <header class="topbar">
+    <button class="address-pill" onclick="openM('addrModal')">
+      📍 <span id="addrLabel">Set Address</span>
+    </button>
+    <div class="topbar-spacer"></div>
+    <button class="topbar-btn btn-search" onclick="openM('searchModal')">🔍 Search</button>
+    <button class="topbar-btn btn-cart" id="topCartBtn" onclick="openCartModal()">
+      🛒 <span id="cartLabel">0 Items</span>
+    </button>
+    <button class="topbar-btn btn-account">👤 <span id="acctName">Account</span></button>
+  </header>
+
+  <div class="content-area">
+    <!-- HOME -->
+    <div class="feed" id="pageHome">
+      <div>
+        <div class="section-title">🍽️ All Restaurants</div>
+        <div class="section-sep"></div>
+        <div class="resto-bar" id="restoBar"></div>
+      </div>
+      <div id="menuSections">
+        <div style="color:var(--gray);padding:20px">Loading menu…</div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="feed" id="pageOrders" style="display:none">
+      <div class="section-title">📦 Orders</div>
+      <div class="section-sep"></div>
+      <div id="ordersEl"></div>
+    </div>
+
+    <!-- WISHLIST -->
+    <div class="feed" id="pageWishlist" style="display:none">
+      <div class="section-title">❤️ Wishlist</div>
+      <div class="section-sep"></div>
+      <div id="wishlistEl"></div>
+    </div>
+
+    <!-- HUNT SIDEBAR -->
+    <aside class="hunt-sidebar" id="huntSidebar">
+      <div class="hunt-title">Go For Hunt</div>
+      <div id="huntItems"></div>
+    </aside>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SWITCH RESTAURANT MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="switchRestoModal">
+  <div class="modal switch-modal">
+    <h3>🍽️ Start a new order?</h3>
+    <p>Your cart already has items from</p>
+    <div class="resto-names">
+      <span class="rname" id="switchFromName"></span>
+      <span class="arrow">→</span>
+      <span class="rname" id="switchToName"></span>
+    </div>
+    <p style="margin-bottom:16px">Adding this item will <strong>clear your current cart</strong>.<br>Do you want to start fresh?</p>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="modal-btn cancel" onclick="closeM('switchRestoModal')">Keep Current Cart</button>
+      <button class="modal-btn confirm" id="switchConfirmBtn" onclick="confirmSwitch()">Start New Order</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = "http://localhost:3000";
+
+// ── DB state ──────────────────────────────
+let menuItems   = [];
+let customers   = [];
+let restaurants = [];
+let categories  = [];
+let ratings     = [];
+
+// ── Session ───────────────────────────────
+let currentUser     = null;
+let cart            = [];
+let wishlist        = [];
+let deliveryAddress = "";
+let restoFilter     = null;
+let pendingRateRid  = null;
+let chosenStars     = 0;
+
+const EMOJI = {
+  "South Indian":"🫓","Chinese":"🥡","Fast Food":"🍔","Punjabi":"🥘",
+  "Desserts":"🍰","Biryani":"🍛","Pizza":"🍕","Burger":"🍔",
+  "Noodles":"🍜","Sweets":"🍮","Starters":"🥗","Drinks":"🥤"
+};
+const BG = ["card-bg-0","card-bg-1","card-bg-2","card-bg-3","card-bg-4"];
+
+// ══════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════
+window.addEventListener("DOMContentLoaded", async () => {
+  await loadAll();
+  document.getElementById("searchInp").addEventListener("input", handleSearch);
+  document.querySelectorAll(".modal-overlay").forEach(ov =>
+    ov.addEventListener("click", e => { if (e.target===ov) ov.classList.remove("open"); })
+  );
+  document.getElementById("custPass").addEventListener("keydown", e => { if (e.key==="Enter") doCustomerLogin(); });
+  document.getElementById("restPass").addEventListener("keydown", e => { if (e.key==="Enter") doRestaurantLogin(); });
+});
+
+// ══════════════════════════════════════════
+//  API HELPER
+// ══════════════════════════════════════════
+async function api(path, opts={}) {
+  const res = await fetch(BASE+path, { headers:{"Content-Type":"application/json"}, ...opts });
+  if (!res.ok) {
+    const b = await res.json().catch(()=>({error:res.statusText}));
+    throw new Error(b.error||res.statusText);
+  }
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+//  LOAD ALL FROM MYSQL
+// ══════════════════════════════════════════
+async function loadAll() {
+  try {
+    const [m,c,r,cat,rat] = await Promise.all([
+      api("/menu"), api("/customers"), api("/restaurants"),
+      api("/categories"), api("/ratings")
+    ]);
+    menuItems=m||[]; customers=c||[]; restaurants=r||[];
+    categories=cat||[]; ratings=rat||[];
+    fillCustDropdown();
+    fillRestDropdown();
+  } catch(e) {
+    toast("⚠️ Cannot reach server — is server.js running on port 3000?");
+  }
+}
+
+function fillCustDropdown() {
+  const sel = document.getElementById("custSel");
+  sel.innerHTML = "<option value=''>— Choose Account —</option>";
+  customers.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.customer_id;
+    o.textContent = `${c.customer_firstname} ${c.customer_lastname}  (${c.customer_email})`;
+    sel.appendChild(o);
+  });
+}
+
+function fillRestDropdown() {
+  const sel = document.getElementById("restSel");
+  sel.innerHTML = "<option value=''>— Choose Restaurant —</option>";
+  restaurants.forEach(r => {
+    const o = document.createElement("option");
+    o.value = r.restaurant_id;
+    o.textContent = r.restaurant_name;
+    sel.appendChild(o);
+  });
+}
+
+// ══════════════════════════════════════════
+//  LOGIN SCREEN TABS
+// ══════════════════════════════════════════
+function setRole(role) {
+  document.getElementById("custPanel").style.display = role==="customer"   ?"":"none";
+  document.getElementById("restPanel").style.display = role==="restaurant" ?"":"none";
+  document.getElementById("roleTabCust").className = "ltab"+(role==="customer"   ?" on":"");
+  document.getElementById("roleTabRest").className = "ltab"+(role==="restaurant" ?" on":"");
+}
+
+function setCustSub(sub) {
+  document.getElementById("cLoginForm").style.display = sub==="login"    ?"":"none";
+  document.getElementById("cRegForm").style.display   = sub==="register" ?"":"none";
+  document.getElementById("cSubLogin").className = "stab"+(sub==="login"    ?" on":"");
+  document.getElementById("cSubReg").className   = "stab"+(sub==="register" ?" on":"");
+  document.getElementById("cLoginErr").textContent="";
+  document.getElementById("cRegErr").textContent="";
+}
+
+function setRestSub(sub) {
+  document.getElementById("rLoginForm").style.display = sub==="login"    ?"":"none";
+  document.getElementById("rRegForm").style.display   = sub==="register" ?"":"none";
+  document.getElementById("rSubLogin").className = "stab"+(sub==="login"    ?" on":"");
+  document.getElementById("rSubReg").className   = "stab"+(sub==="register" ?" on":"");
+  document.getElementById("rLoginErr").textContent="";
+  document.getElementById("rRegErr").textContent="";
+}
+
+// ══════════════════════════════════════════
+//  CUSTOMER LOGIN
+// ══════════════════════════════════════════
+async function doCustomerLogin() {
+  const id   = document.getElementById("custSel").value;
+  const pass = document.getElementById("custPass").value;
+  const err  = document.getElementById("cLoginErr");
+  err.textContent="";
+  if (!id)   { err.textContent="Please select an account."; return; }
+  if (!pass) { err.textContent="Enter your password."; return; }
+
+  const btn = document.getElementById("cLoginBtn");
+  btn.disabled=true; btn.innerHTML="<span class='spin'></span>Logging in…";
+  try {
+    const user = await api("/login",{method:"POST",body:JSON.stringify({customer_id:id,password:pass})});
+    currentUser     = { type:"customer", data:user };
+    deliveryAddress = user.customer_address||"";
+    if (deliveryAddress) document.getElementById("addrLabel").textContent =
+      deliveryAddress.length>28 ? deliveryAddress.slice(0,28)+"…" : deliveryAddress;
+
+    document.getElementById("acctName").textContent = user.customer_firstname;
+    document.getElementById("loginScreen").style.display = "none";
+    // Customer sees Cart + Wishlist
+    document.getElementById("navCart").style.display     = "";
+    document.getElementById("navWishlist").style.display = "";
+    document.getElementById("topCartBtn").style.display  = "";
+    await renderHome();
+    toast("Welcome back, "+user.customer_firstname+"! 👋");
+  } catch(e) { err.textContent=e.message||"Login failed"; }
+  finally { btn.disabled=false; btn.textContent="Login"; }
+}
+
+// ══════════════════════════════════════════
+//  CUSTOMER REGISTER
+// ══════════════════════════════════════════
+async function doCustomerRegister() {
+  const f=document.getElementById("cRFirst").value.trim();
+  const l=document.getElementById("cRLast").value.trim();
+  const em=document.getElementById("cREmail").value.trim();
+  const ph=document.getElementById("cRPhone").value.trim();
+  const addr=document.getElementById("cRAddr").value.trim();
+  const pw=document.getElementById("cRPass").value;
+  const err=document.getElementById("cRegErr");
+  if (!f||!l||!em||!ph||!addr||!pw){err.textContent="All fields are required!";return;}
+
+  const btn=document.getElementById("cRegBtn");
+  btn.disabled=true; btn.innerHTML="<span class='spin'></span>Creating account…";
+  err.textContent="";
+  try {
+    await api("/register-customer",{method:"POST",body:JSON.stringify({firstname:f,lastname:l,email:em,phone:ph,address:addr,password:pw})});
+    customers=await api("/customers");
+    fillCustDropdown();
+    // Pre-select new user and switch to login
+    const sel=document.getElementById("custSel");
+    for (const opt of sel.options) { if (opt.textContent.includes(em)){sel.value=opt.value;break;} }
+    setCustSub("login");
+    toast("Account created! 🎉  Enter your password and login.");
+    ["cRFirst","cRLast","cREmail","cRPhone","cRAddr","cRPass"].forEach(i=>document.getElementById(i).value="");
+  } catch(e){err.textContent=e.message||"Registration failed";}
+  finally{btn.disabled=false;btn.textContent="Create Account";}
+}
+
+// ══════════════════════════════════════════
+//  RESTAURANT LOGIN
+// ══════════════════════════════════════════
+async function doRestaurantLogin() {
+  const id   = document.getElementById("restSel").value;
+  const pass = document.getElementById("restPass").value;
+  const err  = document.getElementById("rLoginErr");
+  err.textContent="";
+  if (!id)   {err.textContent="Please select a restaurant.";return;}
+  if (!pass) {err.textContent="Enter your password.";return;}
+
+  const btn=document.getElementById("rLoginBtn");
+  btn.disabled=true; btn.innerHTML="<span class='spin'></span>Logging in…";
+  try {
+    const resto=await api("/restaurant-login",{method:"POST",body:JSON.stringify({restaurant_id:id,password:pass})});
+    currentUser={type:"restaurant",data:resto};
+    document.getElementById("acctName").textContent=resto.restaurant_name;
+    document.getElementById("loginScreen").style.display="none";
+    // Restaurant: hide Cart + Wishlist
+    document.getElementById("navCart").style.display     ="none";
+    document.getElementById("navWishlist").style.display ="none";
+    document.getElementById("topCartBtn").style.display  ="none";
+    await renderRestoDash();
+    toast("Welcome, "+resto.restaurant_name+"! 🍽️");
+  } catch(e){err.textContent=e.message||"Login failed";}
+  finally{btn.disabled=false;btn.textContent="Login";}
+}
+
+// ══════════════════════════════════════════
+//  RESTAURANT REGISTER
+// ══════════════════════════════════════════
+async function doRestaurantRegister() {
+  const name  = document.getElementById("rRName").value.trim();
+  const addr  = document.getElementById("rRAddr").value.trim();
+  const phone = document.getElementById("rRPhone").value.trim();
+  const pw    = document.getElementById("rRPass").value;
+  const err   = document.getElementById("rRegErr");
+  if (!name||!addr||!phone||!pw){err.textContent="All fields required!";return;}
+
+  const btn=document.getElementById("rRegBtn");
+  btn.disabled=true; btn.innerHTML="<span class='spin'></span>Registering…";
+  err.textContent="";
+  try {
+    await api("/register-restaurant",{method:"POST",body:JSON.stringify({name,address:addr,phone,password:pw})});
+    restaurants=await api("/restaurants");
+    fillRestDropdown();
+    setRestSub("login");
+    toast("Restaurant registered! 🎉  Go to Login tab to sign in.");
+    ["rRName","rRAddr","rRPhone","rRPass"].forEach(i=>document.getElementById(i).value="");
+  } catch(e){err.textContent=e.message||"Registration failed";}
+  finally{btn.disabled=false;btn.textContent="Register Restaurant";}
+}
+
+// ══════════════════════════════════════════
+//  LOGOUT
+// ══════════════════════════════════════════
+function doLogout() {
+  currentUser=null; cart=[]; wishlist=[]; deliveryAddress=""; restoFilter=null;
+  updateCartUI();
+  document.getElementById("loginScreen").style.display="flex";
+  document.getElementById("custPass").value="";
+  document.getElementById("restPass").value="";
+  document.getElementById("cLoginErr").textContent="";
+  document.getElementById("rLoginErr").textContent="";
+  document.getElementById("addrLabel").textContent="Set Address";
+  loadAll();
+}
+
+// ══════════════════════════════════════════
+//  ADDRESS
+// ══════════════════════════════════════════
+function confirmAddr() {
+  const addr=document.getElementById("addrInp").value.trim();
+  if (addr) {
+    deliveryAddress=addr;
+    document.getElementById("addrLabel").textContent=addr.length>28?addr.slice(0,28)+"…":addr;
+  }
+  closeM("addrModal");
+}
+
+// ══════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════
+async function renderHome() {
+  showPage("home");
+  document.getElementById("huntSidebar").style.display="";
+
+  // Restaurant chips — all restaurants, no city filter
+  const bar=document.getElementById("restoBar");
+  bar.innerHTML="";
+  const allChip=mkChip("🍽️ All",!restoFilter,()=>{restoFilter=null;setChip(allChip);renderMenuSections();});
+  bar.appendChild(allChip);
+  restaurants.forEach(r=>{
+    const chip=mkChip(r.restaurant_name,restoFilter===r.restaurant_id,()=>{
+      restoFilter=r.restaurant_id;setChip(chip);renderMenuSections();
+    });
+    bar.appendChild(chip);
+  });
+
+  // Hunt sidebar — unique category names
+  const hunt=document.getElementById("huntItems");
+  hunt.innerHTML="";
+  const uniqueNames=[...new Set(categories.map(c=>c.category_name))];
+  uniqueNames.forEach((name,i)=>{
+    const div=document.createElement("div");
+    div.className="hunt-item"+(i===0?" active":"");
+    div.innerHTML=`<div class="hunt-emoji">${EMOJI[name]||"🍽️"}</div>${name}`;
+    div.onclick=()=>{
+      document.querySelectorAll(".hunt-item").forEach(x=>x.classList.remove("active"));
+      div.classList.add("active");
+      const first=categories.find(c=>c.category_name===name);
+      if (first) document.getElementById("cat-"+first.category_id)?.scrollIntoView({behavior:"smooth"});
+    };
+    hunt.appendChild(div);
+  });
+
+  renderMenuSections();
+}
+
+function mkChip(label,active,onClick){
+  const btn=document.createElement("button");
+  btn.className="resto-chip"+(active?" active":"");
+  btn.textContent=label; btn.onclick=onClick; return btn;
+}
+
+function setChip(el){
+  document.querySelectorAll(".resto-chip").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+}
+
+// ══════════════════════════════════════════
+//  RENDER MENU SECTIONS
+// ══════════════════════════════════════════
+function renderMenuSections() {
+  const ms=document.getElementById("menuSections");
+  ms.innerHTML="";
+
+  const showRestos=restoFilter
+    ?restaurants.filter(r=>r.restaurant_id===restoFilter)
+    :restaurants;
+
+  if (!showRestos.length){
+    ms.innerHTML="<div style='color:var(--gray);padding:20px'>No restaurants found.</div>";
+    return;
+  }
+
+  // Each restaurant shows ALL its categories (multiple allowed per restaurant)
+  showRestos.forEach(resto=>{
+    const restoCats=categories.filter(c=>c.restaurant_id===resto.restaurant_id);
+    if (!restoCats.length) return;
+
+    restoCats.forEach((cat,catIdx)=>{
+      const items=menuItems.filter(m=>m.category_id===cat.category_id);
+      const avg=getAvgRating(resto.restaurant_id);
+      const isOwner=currentUser?.type==="restaurant"&&cat.restaurant_id===currentUser.data.restaurant_id;
+
+      const sec=document.createElement("div");
+      sec.id="cat-"+cat.category_id;
+      sec.innerHTML=`
+        <div class="section-title">${EMOJI[cat.category_name]||"🍽️"} ${cat.category_name}</div>
+        <div class="section-meta">🏪 ${resto.restaurant_name} &nbsp;·&nbsp; 📍 ${resto.restaurant_address} &nbsp;·&nbsp; ⭐ ${avg}</div>
+        <div class="section-sep"></div>
+      `;
+      const grid=document.createElement("div"); grid.className="items-grid";
+
+      if (!items.length&&!isOwner){
+        const empty=document.createElement("div");
+        empty.style.cssText="color:var(--gray);font-size:13px;grid-column:1/-1;padding:10px 0";
+        empty.textContent="No items yet."; grid.appendChild(empty);
+      }
+      items.forEach((item,j)=>grid.appendChild(makeCard(item,cat,resto,(catIdx+j)%BG.length)));
+
+      if (isOwner){
+        const addCard=document.createElement("div");
+        addCard.className="food-card card-bg-1";
+        addCard.style.cssText="border:2px dashed #b2dfdb;cursor:pointer";
+        addCard.innerHTML=`<div class="card-img-wrap" style="background:rgba(255,255,255,.7)"><div style="font-size:44px">➕</div></div><div class="card-name" style="text-align:center">Add Item</div>`;
+        addCard.onclick=()=>openAddItem(cat.category_id);
+        grid.appendChild(addCard);
+      }
+      sec.appendChild(grid); ms.appendChild(sec);
+    });
+
+    // Add Category button for owner
+    if (currentUser?.type==="restaurant"&&resto.restaurant_id===currentUser.data.restaurant_id){
+      const acBtn=document.createElement("button");
+      acBtn.className="modal-btn confirm"; acBtn.style.cssText="margin-top:10px;font-size:13px";
+      acBtn.textContent="📂 Add New Category"; acBtn.onclick=()=>openM("addCatModal");
+      ms.appendChild(acBtn);
+    }
+  });
+}
+
+function makeCard(item,cat,resto,bgIdx){
+  const card=document.createElement("div");
+  card.className="food-card "+(BG[bgIdx]||"card-bg-0");
+  const loved=wishlist.includes(item.item_code);
+  const price=item.price??item.Price??0;
+  const isOwner=currentUser?.type==="restaurant"&&cat.restaurant_id===currentUser?.data?.restaurant_id;
+  card.innerHTML=`
+    <div class="card-img-wrap">
+      <div class="card-emoji">${EMOJI[cat.category_name]||"🍽️"}</div>
+      <span class="rating-badge">${getAvgRating(cat.restaurant_id)}</span>
+      ${!isOwner
+        ?`<button class="wish-btn ${loved?"liked":""}" data-code="${item.item_code}">${loved?"♥":"♡"}</button>`
+        :`<button class="del-btn" onclick="deleteItem(${item.item_code},event)">🗑 Delete</button>`}
+    </div>
+    <div class="card-name">${item.item_name}</div>
+    <div class="card-price">Price: <strong>₹${price}</strong></div>
+    <div class="card-sub">#${item.item_code}</div>
+    ${!isOwner?`<button class="add-btn">+ Add to Cart</button>`:""}
+  `;
+  if (!isOwner){
+    card.querySelector(".wish-btn").addEventListener("click",e=>{e.stopPropagation();toggleWish(item.item_code,e.currentTarget);});
+    card.querySelector(".add-btn").addEventListener("click",e=>{
+      e.stopPropagation();
+      if (!deliveryAddress){openM("addrModal");return;}
+      addToCart(item,cat.restaurant_id,resto?.restaurant_name||"");
+    });
+  }
+  return card;
+}
+
+// ══════════════════════════════════════════
+//  RESTAURANT DASHBOARD
+// ══════════════════════════════════════════
+async function renderRestoDash() {
+  showPage("home");
+  document.getElementById("huntSidebar").style.display="none";
+  document.getElementById("restoBar").innerHTML="";
+  const ms=document.getElementById("menuSections");
+  ms.innerHTML="<div style='color:var(--gray)'>Loading dashboard…</div>";
+
+  const r=currentUser.data;
+  const [stats,orders]=await Promise.all([
+    api("/restaurant-stats/"+r.restaurant_id).catch(()=>({orders:0,revenue:0,rating:"N/A",cats:0})),
+    api("/restaurant-orders/"+r.restaurant_id).catch(()=>[])
+  ]);
+  const myCats=categories.filter(c=>c.restaurant_id===r.restaurant_id);
+  ms.innerHTML="";
+  const wrap=document.createElement("div");
+
+  wrap.innerHTML=`
+    <div class="section-title">🏪 ${r.restaurant_name}</div>
+    <div class="section-meta">📍 ${r.restaurant_address} &nbsp;·&nbsp; 📞 ${r.restaurant_phoneno}</div>
+    <div class="section-sep"></div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num">${stats.orders}</div><div class="stat-label">Orders</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--gold)">⭐ ${stats.rating}</div><div class="stat-label">Rating</div></div>
+      <div class="stat-box"><div class="stat-num">₹${stats.revenue}</div><div class="stat-label">Revenue</div></div>
+      <div class="stat-box"><div class="stat-num" style="font-size:20px;color:var(--dark)">${myCats.length}</div><div class="stat-label">Categories</div></div>
+    </div>
+  `;
+
+  const mt=document.createElement("div");
+  mt.className="section-title"; mt.style.fontSize="18px"; mt.textContent="📋 My Menu";
+  wrap.appendChild(mt);
+  const sp=document.createElement("div"); sp.className="section-sep"; wrap.appendChild(sp);
+
+  if (!myCats.length){
+    const nd=document.createElement("div"); nd.style.cssText="color:var(--gray);font-size:13px;margin-bottom:14px";
+    nd.textContent="No categories yet. Add one below!"; wrap.appendChild(nd);
+  } else {
+    myCats.forEach((cat,i)=>{
+      const lbl=document.createElement("div");
+      lbl.style.cssText="font-weight:700;font-size:13px;color:var(--gray);margin:14px 0 8px";
+      lbl.textContent=cat.category_name; wrap.appendChild(lbl);
+      const grid=document.createElement("div"); grid.className="items-grid";
+      menuItems.filter(m=>m.category_id===cat.category_id).forEach((item,j)=>grid.appendChild(makeCard(item,cat,r,(i+j)%BG.length)));
+      const addCard=document.createElement("div");
+      addCard.className="food-card card-bg-1"; addCard.style.cssText="border:2px dashed #b2dfdb;cursor:pointer";
+      addCard.onclick=()=>openAddItem(cat.category_id);
+      addCard.innerHTML=`<div class="card-img-wrap" style="background:rgba(255,255,255,.7)"><div style="font-size:44px">➕</div></div><div class="card-name" style="text-align:center">Add Item</div>`;
+      grid.appendChild(addCard); wrap.appendChild(grid);
+    });
+  }
+
+  const acBtn=document.createElement("button");
+  acBtn.className="modal-btn confirm"; acBtn.style.cssText="margin-top:14px;font-size:13px";
+  acBtn.textContent="📂 Add New Category"; acBtn.onclick=()=>openM("addCatModal");
+  wrap.appendChild(acBtn);
+
+  const ot=document.createElement("div");
+  ot.innerHTML=`<div class="section-title" style="font-size:18px;margin-top:28px">📦 Recent Orders</div><div class="section-sep"></div>`;
+  wrap.appendChild(ot);
+
+  if (!orders.length){const nd=document.createElement("div");nd.style.color="var(--gray)";nd.textContent="No orders yet.";wrap.appendChild(nd);}
+  else orders.forEach(ord=>{
+    const sc=(ord.delivery_status||ord.Order_status||"").replace(/ /g,"");
+    const div=document.createElement("div"); div.className="order-card";
+    div.innerHTML=`
+      <div class="order-card-header">
+        <span><strong>Order #${ord.Order_id}</strong></span>
+        <span class="order-status status-${sc}">${ord.delivery_status||ord.Order_status}</span>
+      </div>
+      <div style="font-size:13px;color:var(--gray)">👤 ${ord.customer_firstname||""} ${ord.customer_lastname||""} &nbsp;|&nbsp; 💳 ${ord.payment_mode||""} &nbsp;|&nbsp; 📍 ${ord.delivery_address||""}</div>
+      <div style="margin-top:7px">${(ord.items||[]).map(i=>`<span class="item-tag">${i.item_name} ×${i.quantity}</span>`).join("")}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--salmon);margin-top:8px">₹${ord.Order_amount}</div>
+    `;
+    wrap.appendChild(div);
+  });
+  ms.appendChild(wrap);
+}
+
+// ══════════════════════════════════════════
+//  ADD / DELETE ITEM
+// ══════════════════════════════════════════
+function openAddItem(catId) {
+  const sel=document.getElementById("aiCat"); sel.innerHTML="<option value=''>Select…</option>";
+  categories.filter(c=>c.restaurant_id===currentUser.data.restaurant_id).forEach(c=>{
+    const o=document.createElement("option"); o.value=c.category_id; o.textContent=c.category_name;
+    if (c.category_id===catId) o.selected=true; sel.appendChild(o);
+  });
+  document.getElementById("aiErr").textContent="";
+  openM("addItemModal");
+}
+
+async function submitItem() {
+  const name=document.getElementById("aiName").value.trim();
+  const price=document.getElementById("aiPrice").value;
+  const catId=document.getElementById("aiCat").value;
+  const err=document.getElementById("aiErr");
+  if (!name||!price||!catId){err.textContent="All fields required!";return;}
+  const btn=document.getElementById("aiBtn"); btn.disabled=true; btn.innerHTML="<span class='spin'></span>Adding…";
+  try {
+    await api("/menu",{method:"POST",body:JSON.stringify({item_name:name,price:+price,category_id:+catId})});
+    menuItems=await api("/menu");
+    closeM("addItemModal");
+    document.getElementById("aiName").value=""; document.getElementById("aiPrice").value="";
+    toast("Item added! Customers can see it now 🎉");
+    if (currentUser.type==="restaurant") await renderRestoDash(); else renderMenuSections();
+  } catch(e){err.textContent=e.message||"Failed";}
+  finally{btn.disabled=false;btn.textContent="Add Item";}
+}
+
+async function deleteItem(code,e) {
+  e.stopPropagation();
+  if (!confirm("Delete this item?")) return;
+  try {
+    await api("/menu/"+code,{method:"DELETE"});
+    menuItems=await api("/menu");
+    toast("Item deleted.");
+    if (currentUser?.type==="restaurant") await renderRestoDash(); else renderMenuSections();
+  } catch(err){toast("Delete failed: "+err.message);}
+}
+
+// ══════════════════════════════════════════
+//  ADD CATEGORY
+// ══════════════════════════════════════════
+async function submitCategory() {
+  const name=document.getElementById("acName").value.trim();
+  const err=document.getElementById("acErr");
+  if (!name){err.textContent="Enter a category name!";return;}
+  const btn=document.getElementById("acBtn"); btn.disabled=true; btn.innerHTML="<span class='spin'></span>Adding…";
+  try {
+    await api("/categories",{method:"POST",body:JSON.stringify({category_name:name,restaurant_id:currentUser.data.restaurant_id})});
+    categories=await api("/categories");
+    closeM("addCatModal"); document.getElementById("acName").value="";
+    toast("Category added! 🎉"); await renderRestoDash();
+  } catch(e){err.textContent=e.message||"Failed";}
+  finally{btn.disabled=false;btn.textContent="Add Category";}
+}
+
+// ══════════════════════════════════════════
+//  RATINGS
+// ══════════════════════════════════════════
+function getAvgRating(rid) {
+  const rs=ratings.filter(r=>r.restaurant_id===rid);
+  if (!rs.length) return "N/A";
+  return (rs.reduce((s,r)=>s+r.ratings,0)/rs.length).toFixed(1);
+}
+
+function openRateModal(rid) {
+  if (!rid) return;
+  pendingRateRid=rid; chosenStars=0;
+  const r=restaurants.find(x=>x.restaurant_id===rid);
+  document.getElementById("rateRestoName").textContent=r?r.restaurant_name:"";
+  const sp=document.getElementById("starPicker"); sp.innerHTML="";
+  for (let i=1;i<=5;i++){
+    const btn=document.createElement("button"); btn.textContent="☆";
+    btn.style.cssText="font-size:30px;background:none;border:none;cursor:pointer;color:var(--gold)";
+    btn.onclick=()=>{chosenStars=i;[...sp.children].forEach((b,idx)=>b.textContent=idx<i?"★":"☆");};
+    sp.appendChild(btn);
+  }
+  openM("rateModal");
+}
+
+async function submitRating() {
+  if (!chosenStars){toast("Pick a star first!");return;}
+  if (!currentUser||currentUser.type!=="customer") return;
+  try {
+    await api("/rate",{method:"POST",body:JSON.stringify({customer_id:currentUser.data.customer_id,restaurant_id:pendingRateRid,rating:chosenStars})});
+    ratings=await api("/ratings");
+    closeM("rateModal"); toast("Rating saved ⭐");
+    renderMenuSections();
+  } catch(e){toast("Rating failed: "+e.message);}
+}
+
+// ══════════════════════════════════════════
+//  CART
+// ══════════════════════════════════════════
+
+// Pending item waiting for switch confirmation
+let pendingSwitch = null;
+
+function addToCart(item, rid, rname) {
+  const price = item.price ?? item.Price ?? 0;
+
+  // If cart has items from a DIFFERENT restaurant, ask to switch
+  if (cart.length > 0 && cart[0].restaurant_id !== rid) {
+    const currentRname = cart[0].restaurant_name;
+    document.getElementById("switchFromName").textContent = currentRname;
+    document.getElementById("switchToName").textContent   = rname;
+    // Store the pending item so confirmSwitch() can add it
+    pendingSwitch = { item, rid, rname, price };
+    openM("switchRestoModal");
+    return;
+  }
+
+  // Same restaurant (or empty cart) — add normally
+  const ex = cart.find(c => c.item_code === item.item_code);
+  if (ex) ex.quantity++;
+  else cart.push({ item_code: item.item_code, item_name: item.item_name, price, quantity: 1, restaurant_id: rid, restaurant_name: rname });
+  updateCartUI();
+  toast("Added: " + item.item_name + " 🛒");
+}
+
+// Called when user confirms switching restaurants
+function confirmSwitch() {
+  if (!pendingSwitch) return;
+  const { item, rid, rname, price } = pendingSwitch;
+  pendingSwitch = null;
+  closeM("switchRestoModal");
+  // Clear old cart and start fresh with the new item
+  cart = [];
+  cart.push({ item_code: item.item_code, item_name: item.item_name, price, quantity: 1, restaurant_id: rid, restaurant_name: rname });
+  updateCartUI();
+  toast("Cart switched to " + rname + " 🛒");
+}
+
+function removeFromCart(code) {
+  const idx=cart.findIndex(c=>c.item_code===code);
+  if (idx===-1) return;
+  if (cart[idx].quantity>1) cart[idx].quantity--; else cart.splice(idx,1);
+  updateCartUI(); drawCart();
+}
+
+function clearCart(){cart=[];pendingSwitch=null;updateCartUI();drawCart();}
+function cartSum(){return cart.reduce((s,i)=>s+i.price*i.quantity,0);}
+
+function updateCartUI(){
+  const n=cart.reduce((s,i)=>s+i.quantity,0);
+  document.getElementById("cartLabel").textContent=n+" Item"+(n!==1?"s":"");
+}
+
+function openCartModal(){drawCart();openM("cartModal");}
+
+function drawCart() {
+  const body=document.getElementById("cartBody");
+  const totEl=document.getElementById("cartTotalRow");
+  if (!cart.length){body.innerHTML="<div style='color:var(--gray);padding:10px 0'>Cart is empty!</div>";totEl.style.display="none";return;}
+  body.innerHTML="";
+  cart.forEach(item=>{
+    const row=document.createElement("div"); row.className="cart-row";
+    row.innerHTML=`
+      <div class="cart-row-name">${item.item_name}<br><span style="font-size:11px;color:var(--gray)">${item.restaurant_name}</span></div>
+      <div class="cart-row-qty">
+        <button class="qty-btn" onclick="removeFromCart(${item.item_code})">−</button>
+        <span>${item.quantity}</span>
+        <button class="qty-btn" onclick="addToCart({item_code:${item.item_code},item_name:'${item.item_name.replace(/'/g,"\\'")}',price:${item.price}},${item.restaurant_id},'${item.restaurant_name.replace(/'/g,"\\'")}')">+</button>
+      </div>
+      <div class="cart-row-price">₹${item.price*item.quantity}</div>
+    `;
+    body.appendChild(row);
+  });
+  totEl.style.display="flex";
+  totEl.innerHTML=`<span>Total</span><span style="color:var(--salmon)">₹${cartSum()}</span>`;
+}
+
+async function placeOrder() {
+  if (!currentUser||currentUser.type!=="customer"){toast("Login as a customer first!");return;}
+  if (!cart.length){toast("Cart is empty!");return;}
+  if (!deliveryAddress){closeM("cartModal");openM("addrModal");return;}
+  const btn=document.getElementById("placeBtn"); btn.disabled=true; btn.innerHTML="<span class='spin'></span>Placing…";
+  try {
+    const result=await api("/order",{method:"POST",body:JSON.stringify({
+      customer_id:currentUser.data.customer_id,
+      restaurant_id:cart[0].restaurant_id,
+      items:cart.map(i=>({item_code:i.item_code,quantity:i.quantity})),
+      total:cartSum(),
+      payment_mode:document.getElementById("payMode").value,
+      delivery_address:deliveryAddress
+    })});
+    const rid=cart[0].restaurant_id;
+    cart=[]; updateCartUI(); closeM("cartModal");
+    toast("🎉 Order #"+result.Order_id+" placed & saved in DB!");
+    setTimeout(()=>openRateModal(rid),1400);
+  } catch(e){toast("Order failed: "+e.message);}
+  finally{btn.disabled=false;btn.textContent="Place Order";}
+}
+
+// ══════════════════════════════════════════
+//  WISHLIST
+// ══════════════════════════════════════════
+function toggleWish(code,btn) {
+  const idx=wishlist.indexOf(code);
+  if (idx===-1){wishlist.push(code);btn.textContent="♥";btn.classList.add("liked");toast("Added to wishlist ❤️");}
+  else{wishlist.splice(idx,1);btn.textContent="♡";btn.classList.remove("liked");toast("Removed from wishlist");}
+}
+
+function renderWishlist() {
+  const el=document.getElementById("wishlistEl"); el.innerHTML="";
+  if (!wishlist.length){el.innerHTML="<div style='color:var(--gray)'>Nothing saved yet!</div>";return;}
+  const grid=document.createElement("div"); grid.className="items-grid";
+  wishlist.forEach(code=>{
+    const item=menuItems.find(m=>m.item_code===code); if (!item) return;
+    const cat=categories.find(c=>c.category_id===item.category_id)||{category_id:0,category_name:"Unknown",restaurant_id:0};
+    const resto=restaurants.find(r=>r.restaurant_id===cat.restaurant_id)||{restaurant_name:""};
+    grid.appendChild(makeCard(item,cat,resto,0));
+  });
+  el.appendChild(grid);
+}
+
+// ══════════════════════════════════════════
+//  ORDERS PAGE
+// ══════════════════════════════════════════
+async function renderOrders() {
+  const el=document.getElementById("ordersEl");
+  el.innerHTML="<div style='color:var(--gray)'>Loading…</div>";
+  if (!currentUser) return;
+  try {
+    const endpoint=currentUser.type==="restaurant"
+      ?"/restaurant-orders/"+currentUser.data.restaurant_id
+      :"/orders/"+currentUser.data.customer_id;
+    const orders=await api(endpoint);
+    el.innerHTML="";
+    if (!orders.length){el.innerHTML="<div style='color:var(--gray)'>No orders yet!</div>";return;}
+    orders.forEach(ord=>{
+      const sc=(ord.delivery_status||ord.Order_status||"").replace(/ /g,"");
+      const div=document.createElement("div"); div.className="order-card";
+      div.innerHTML=`
+        <div class="order-card-header">
+          <span><strong>Order #${ord.Order_id}</strong> · ${ord.restaurant_name||""}</span>
+          <span class="order-status status-${sc}">${ord.delivery_status||ord.Order_status||""}</span>
+        </div>
+        <div style="font-size:13px;color:var(--gray)">📅 ${ord.Order_time||""} &nbsp;|&nbsp; 💳 ${ord.payment_mode||""} &nbsp;|&nbsp; 📍 ${ord.delivery_address||""}</div>
+        <div style="margin-top:8px">${(ord.items||[]).map(i=>`<span class="item-tag">${i.item_name} ×${i.quantity}</span>`).join("")}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <div style="font-size:15px;font-weight:700;color:var(--salmon)">₹${ord.Order_amount}</div>
+          ${currentUser.type==="customer"?`<button class="modal-btn confirm" style="font-size:12px;padding:6px 14px" onclick="openRateModal(${ord.restaurant_id})">⭐ Rate</button>`:""}
+        </div>
+      `;
+      el.appendChild(div);
+    });
+  } catch(e){el.innerHTML="<div style='color:#e53935'>Failed to load orders.</div>";}
+}
+
+// ══════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════
+function handleSearch(e) {
+  const q=e.target.value.toLowerCase().trim();
+  const res=document.getElementById("searchRes");
+  if (!q){res.innerHTML="";return;}
+  const matches=menuItems.filter(m=>m.item_name.toLowerCase().includes(q));
+  if (!matches.length){res.innerHTML="<div style='color:var(--gray);padding:10px 0'>No results.</div>";return;}
+  res.innerHTML="";
+  matches.forEach(item=>{
+    const cat=categories.find(c=>c.category_id===item.category_id)||{category_name:"?",restaurant_id:0};
+    const resto=restaurants.find(r=>r.restaurant_id===cat.restaurant_id)||{restaurant_name:"?"};
+    const row=document.createElement("div"); row.className="cart-row"; row.style.cursor="pointer";
+    row.innerHTML=`
+      <div><div style="font-weight:600">${item.item_name}</div><div style="font-size:11px;color:var(--gray)">${resto.restaurant_name} · ${cat.category_name}</div></div>
+      <div style="font-weight:700;color:var(--salmon)">₹${item.price??item.Price??0}</div>
+    `;
+    row.onclick=()=>{
+      if (!deliveryAddress){closeM("searchModal");openM("addrModal");return;}
+      addToCart(item,cat.restaurant_id,resto.restaurant_name); closeM("searchModal");
+    };
+    res.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════
+//  PAGE NAV
+// ══════════════════════════════════════════
+function showPage(page) {
+  ["Home","Orders","Wishlist"].forEach(p=>
+    document.getElementById("page"+p).style.display=p.toLowerCase()===page?"":"none"
+  );
+  if (page==="orders")   renderOrders();
+  if (page==="wishlist") renderWishlist();
+  document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
+  const map={home:0,orders:1,wishlist:2};
+  if (map[page]!==undefined) document.querySelectorAll(".nav-link")[map[page]]?.classList.add("active");
+}
+
+// ══════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════
+function openM(id){document.getElementById(id).classList.add("open");}
+function closeM(id){document.getElementById(id).classList.remove("open");}
+
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),3000);
+}
+</script>
+</body>
+</html>
